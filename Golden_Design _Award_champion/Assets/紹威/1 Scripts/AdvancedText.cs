@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TMPro;
@@ -43,8 +44,9 @@ namespace WEI
             //*     代表前一個字符出現零次或是多次
             //+     代表前一個字符出現一次或是多次
             //?     代表前一個字符出現零次或是一次
-            pattern = @"<(\d+)(\./d+)?>";
+            pattern = @"<(\d+)(\.\d+)?>";
 
+            processingText = Regex.Replace(processingText, pattern, replacement: "");
             return processingText;
         }
     }
@@ -54,6 +56,73 @@ namespace WEI
         public AdvancedText()
         {
             textPreprocessor = new AdvancedTextPreprocessor();
+        }
+        private AdvancedTextPreprocessor SelfPreprocessor => (AdvancedTextPreprocessor)textPreprocessor;
+
+        public void showTextByTyping(string countent)
+        {
+            SetText(countent);
+            StartCoroutine(routine: Typing());
+        }
+
+        private int _typingIndex;
+        private float _defaultInteravl = 0.06f;
+
+        IEnumerator Typing()
+        {
+            ForceMeshUpdate();
+            for (int i = 0; i < m_characterCount; i++)
+            {
+                SetSinglecharacterAlpha(i, newAlpha: 128);
+            }
+            _typingIndex = 0;
+            while (_typingIndex < m_characterCount)
+            {
+                if (textInfo.characterInfo[_typingIndex].isVisible)
+                {
+                //SetSinglecharacterAlpha(_typingIndex, newAlpha: 255);
+                StartCoroutine(routine: FadeInCharacter(_typingIndex));
+                }
+                if (SelfPreprocessor.IntervalDictionary.TryGetValue(_typingIndex, out float result))
+                {
+                    yield return new WaitForSecondsRealtime(result);
+                }
+                else
+                {
+                    yield return new WaitForSecondsRealtime(_defaultInteravl);
+                }
+                _typingIndex++;
+            }
+        }
+
+        // newAlpha範圍是 0~255 ! ! !
+        private void SetSinglecharacterAlpha(int index, byte newAlpha)
+        {
+            TMP_CharacterInfo charInfo = textInfo.characterInfo[index];
+            int matIndex = charInfo.materialReferenceIndex;
+            int verIndex = charInfo.vertexIndex;
+            for (int i = 0; i < 4; i++)
+            {
+                textInfo.meshInfo[matIndex].colors32[verIndex + i].a = newAlpha;
+            }
+            UpdateVertexData();
+        }
+        IEnumerator FadeInCharacter(int index, float duration = 0.2f)
+        {
+            if (duration <= 0)
+            {
+                SetSinglecharacterAlpha(index, newAlpha: 255);
+            }
+            else
+            {
+                float timer = 0;
+                while (timer < duration)
+                {
+                    timer = Mathf.Min(a: duration, b: timer + Time.unscaledDeltaTime);
+                    SetSinglecharacterAlpha(index, newAlpha: (byte)(255 * timer / duration));
+                    yield return null;
+                }
+            }
         }
     }
 }
