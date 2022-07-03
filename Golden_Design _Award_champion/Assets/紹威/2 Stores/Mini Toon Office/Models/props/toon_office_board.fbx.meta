@@ -3,9 +3,14 @@ guid: 2758c90967b5f4abc996051381f4ff04
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: toon character props
+    second: {fileID: 2100000, guid: fcdb7a99237c6417a9e5766d641a824c, type: 2}
   materials:
-    materialImportMode: 0
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
