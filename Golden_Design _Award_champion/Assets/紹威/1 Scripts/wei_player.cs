@@ -1,15 +1,20 @@
 using UnityEngine;
 namespace WIE
 {
-    public class player : MonoBehaviour
+    public class wei_player : MonoBehaviour
     {
         float moveSpeed;
+        private Rigidbody rig;
+        private CapsuleCollider cal; 
 
         void Start()
         {
             Initialize();
         }
-
+        void Awake()
+        {
+            rig = GetComponent<Rigidbody>();
+        }
         void Update()
         {
             Move(moveSpeed);
